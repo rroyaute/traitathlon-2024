@@ -70,42 +70,42 @@ hist(df_M$Width); hist(log(df_M$Width))
 
 
 
-# 2. Data viz by Group ----
+# 2. Data viz by Observer ----
+# TODO : Improvement: sort by highest average observer speed
 df_B %>% 
   ggplot(aes(x = Average_Speed, y = Groupe)) +
   geom_point(size = 3, alpha = .5) +
-  geom_density_ridges(alpha = .3)
+  geom_density_ridges(alpha = .3) +
+  labs(x = "Average speed", y = "Observer ID")
   
-# 3. Data viz by Individual ----
+# 3. Data viz by Animal ----
+# TODO : Improvement: sort by highest average individual speed
 df_B %>% 
   ggplot(aes(x = Average_Speed, y = Individual)) +
-  geom_point(size = 3, alpha = .5) +
-  geom_density_ridges(alpha = .3)
+  geom_beeswarm(size = 3, alpha = .5) +
+  geom_density_ridges(alpha = .3) +
+  labs(x = "Average speed", y = "Animal ID")
 
-
-
-# 4. Data viz by Group & Video ----
+# 4. Visualizing Observer agreement ----
 df_B %>% 
   ggplot(aes(x = Average_Speed, y = Video)) +
   geom_point(size = 3, alpha = .5) +
   geom_density_ridges(alpha = .3) +
   facet_wrap(~Groupe)
 
-fig.Obs_Ind = df_B %>% 
-  # mutate(Rank = rank(Average_Speed), .by = Groupe) %>% 
-  mutate(avg_speed_id = mean(Average_Speed), .by = Individual) %>% 
-  # ggplot(aes(x = avg_speed_id, y = Rank)) +
-  ggplot(aes(x = avg_speed_id, y = Average_Speed)) +
+fig.repeat.Obs = df_B %>% 
+  mutate(Obs.ID = rep(1:4, each = 16)) %>% 
+  ggplot(aes(x = Obs.ID, y = Average_Speed, group = Individual)) +
   geom_beeswarm(size = 3, alpha = .15) +
-  geom_abline(slope = 1, intercept = 0) +
-  labs(x = "Average speed by Individual", 
-       y = "Average speed by Observer") +
-  coord_cartesian(xlim = c(0,20),
-                  ylim = c(0,20)) +
-  theme(aspect.ratio=1)
- 
-ggsave(filename = "outputs/figs/fig.Obs_Ind.jpeg", fig.Obs_Ind) 
-  
+  geom_line() + 
+  ylim(0,20) +
+  labs(x = "Observer ID", 
+       y = "Average speed", 
+       title = "Observer agreement", 
+       subtitle = "Each line represents a different animal measured \n by 4 different observers") 
+
+ggsave(filename = "outputs/figs/fig.repeat.Obs.jpeg", fig.repeat.Obs)
+
 # 5. Observer repeatability calculation ----
 lmm.1 = lmer(Average_Speed ~ 1 + (1|Groupe) + 
                (1|Video) + 
