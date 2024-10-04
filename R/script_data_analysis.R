@@ -1,4 +1,5 @@
 library(tidyverse); library(easystats); library(lme4); library(ggridges)
+library(ggbeeswarm)
 
 theme_set(theme_bw(14))
 
@@ -90,9 +91,21 @@ df_B %>%
   geom_density_ridges(alpha = .3) +
   facet_wrap(~Groupe)
 
-
-
-
+fig.Obs_Ind = df_B %>% 
+  # mutate(Rank = rank(Average_Speed), .by = Groupe) %>% 
+  mutate(avg_speed_id = mean(Average_Speed), .by = Individual) %>% 
+  # ggplot(aes(x = avg_speed_id, y = Rank)) +
+  ggplot(aes(x = avg_speed_id, y = Average_Speed)) +
+  geom_beeswarm(size = 3, alpha = .15) +
+  geom_abline(slope = 1, intercept = 0) +
+  labs(x = "Average speed by Individual", 
+       y = "Average speed by Observer") +
+  coord_cartesian(xlim = c(0,20),
+                  ylim = c(0,20)) +
+  theme(aspect.ratio=1)
+ 
+ggsave(filename = "outputs/figs/fig.Obs_Ind.jpeg", fig.Obs_Ind) 
+  
 # 5. Observer repeatability calculation ----
 lmm.1 = lmer(Average_Speed ~ 1 + (1|Groupe) + 
                (1|Video) + 
@@ -103,3 +116,5 @@ check_model(lmm.1)
 r2_nakagawa(lmm.1, ci = .95) # Proportion of variation explained by all random effects (Conditional R2)
 r2_nakagawa(lmm.1, by_group = T) # Proportion of variation explained by all terms
 get_variance(lmm.1)
+
+saveRDS(lmm.1, "outputs/mods/lmm.1.rds")
