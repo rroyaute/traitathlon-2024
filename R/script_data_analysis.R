@@ -40,12 +40,12 @@ length(unique(df_M$Groupe))
 length(unique(df_M$Individual)) # Problem with nb of individuals should be 16
 
 # data export into data-clean folder
-write.csv(df_B, file = "data/data-clean/df_B.csv")
-write.csv(df_M, file = "data/data-clean/df_M.csv")
+write.csv(df_B, file = "data/data-clean/df_B.csv", row.names = FALSE)
+write.csv(df_M, file = "data/data-clean/df_M.csv", row.names = FALSE)
 
 # 1. Data viz (first pass) ---- 
-df_B = read.csv(file = "data/data-clean/df_B.csv") # Behavioral tracking data
-df_M = read.csv(file = "data/data-clean/df_M.csv") # Morphological data
+df_B = read.csv(file = "data/data-clean/df_B.csv", row.names = FALSE) # Behavioral tracking data
+df_M = read.csv(file = "data/data-clean/df_M.csv", row.names = F) # Morphological data
 
 ## 1.1 Behavioral traits visualization ----
 # Average speed, Distance traveled, % Time moving, % Arena explored
@@ -55,6 +55,7 @@ hist(df_B$Traveled_Dist); hist(log(df_B$Traveled_Dist))
 hist(df_B$Prop_time_moving); hist(sqrt(df_B$Prop_time_moving))
 hist(df_B$Exploration_relative_value); hist(sqrt(df_B$Exploration_relative_value))
 
+pairs(df_B[,])
 ## 1.2 Morphological traits visualization ----
 # Area, Perimeter, Length, Width
 par(mfrow = c(1,2))
@@ -65,3 +66,11 @@ hist(df_M$Width); hist(log(df_M$Width))
 
 
 
+
+
+# 2. Data viz by Group
+df_B %>% 
+  ggplot(aes(x = Average_Speed, y = Groupe)) +
+  geom_point()
+  
+  
