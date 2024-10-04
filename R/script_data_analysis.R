@@ -1,5 +1,6 @@
-library(tidyverse); library(easystats); library(lme4)
+library(tidyverse); library(easystats); library(lme4); library(ggridges)
 
+theme_set(theme_bw(14))
 
 # 0. Import and check data ----
 ## 0.1 Data import ----
@@ -44,8 +45,8 @@ write.csv(df_B, file = "data/data-clean/df_B.csv", row.names = FALSE)
 write.csv(df_M, file = "data/data-clean/df_M.csv", row.names = FALSE)
 
 # 1. Data viz (first pass) ---- 
-df_B = read.csv(file = "data/data-clean/df_B.csv", row.names = FALSE) # Behavioral tracking data
-df_M = read.csv(file = "data/data-clean/df_M.csv", row.names = F) # Morphological data
+df_B = read.csv(file = "data/data-clean/df_B.csv") # Behavioral tracking data
+df_M = read.csv(file = "data/data-clean/df_M.csv") # Morphological data
 
 ## 1.1 Behavioral traits visualization ----
 # Average speed, Distance traveled, % Time moving, % Arena explored
@@ -68,9 +69,37 @@ hist(df_M$Width); hist(log(df_M$Width))
 
 
 
-# 2. Data viz by Group
+# 2. Data viz by Group ----
 df_B %>% 
   ggplot(aes(x = Average_Speed, y = Groupe)) +
-  geom_point()
+  geom_point(size = 3, alpha = .5) +
+  geom_density_ridges(alpha = .3)
   
-  
+# 3. Data viz by Individual ----
+df_B %>% 
+  ggplot(aes(x = Average_Speed, y = Individual)) +
+  geom_point(size = 3, alpha = .5) +
+  geom_density_ridges(alpha = .3)
+
+
+
+# 4. Data viz by Group & Video ----
+df_B %>% 
+  ggplot(aes(x = Average_Speed, y = Video)) +
+  geom_point(size = 3, alpha = .5) +
+  geom_density_ridges(alpha = .3) +
+  facet_wrap(~Groupe)
+
+
+
+
+# 5. Observer repeatability calculation ----
+lmm.1 = lmer(Average_Speed ~ 1 + (1|Groupe) + 
+               (1|Video) + 
+               (1|Individual), 
+             df_B)
+summary(lmm.1)
+check_model(lmm.1)
+r2_nakagawa(lmm.1, ci = .95) # Proportion of variation explained by all random effects (Conditional R2)
+r2_nakagawa(lmm.1, by_group = T) # Proportion of variation explained by all terms
+get_variance(lmm.1)
